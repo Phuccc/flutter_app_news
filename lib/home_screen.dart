@@ -1,25 +1,46 @@
 import 'dart:convert';
 import 'article_model.dart';
 import 'details_screen.dart';
+import 'time_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text('Flutter'),Text('News', style: TextStyle(color: Color.fromARGB(255, 217, 49, 49),),)],
-          ),
-        titleTextStyle: const TextStyle( 
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Flutter'),
+            const Text(
+              'News',
+              style: TextStyle(color: Color.fromARGB(255, 22, 157, 230)),
+            ),
+            const Spacer(), // Tạo khoảng trống để căn chỉnh vị trí
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                getCurrentDate(),
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 10, 10, 10),
+                  fontFamily: 'MadimiOne',
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+        titleTextStyle: const TextStyle(
           color: Color.fromARGB(255, 0, 0, 0),
-          fontWeight: FontWeight.bold, 
-          fontSize: 25),
-        backgroundColor: Color.fromARGB(255, 204, 235, 251),
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
+        backgroundColor: Color.fromARGB(255, 215, 236, 247),
       ),
       body: FutureBuilder(
         future: getArticles(),
@@ -56,6 +77,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget customListTile(Article article, BuildContext context) {
+    final formattedDifference = getFormattedDifference(article.publishedAt!);
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -69,7 +91,7 @@ class HomeScreen extends StatelessWidget {
         margin: const EdgeInsets.all(12.0),
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 243, 250, 255),
+          color: const Color.fromARGB(255, 243, 250, 255),
           borderRadius: BorderRadius.circular(12.0),
           boxShadow: const [
             BoxShadow(
@@ -113,12 +135,14 @@ class HomeScreen extends StatelessWidget {
                     'By ${article.author ?? 'Unknown'}',
                     style: const TextStyle(
                       color: Color.fromARGB(255, 115, 115, 115),
+                      fontWeight: FontWeight.bold,
+                      fontFamily: "PatrickHand",
                       fontSize: 14.0,
                     ),
                   ),
                   const SizedBox(height: 8.0),
                   Text(
-                    article.publishedAt ?? 'Unknown',
+                    formattedDifference,
                     style: const TextStyle(
                       fontSize: 12.0,
                     ),

@@ -1,10 +1,11 @@
 import 'article_model.dart';
+import 'time_model.dart';
 import 'package:flutter/material.dart';
 
 class ArticlePage extends StatelessWidget {
   final Article article;
 
-  ArticlePage({required this.article});
+  const ArticlePage({super.key, required this.article});
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +15,7 @@ class ArticlePage extends StatelessWidget {
           const Text(
             'Detail',
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Times New Roman',
+              fontFamily: 'MadimiOne',
             ),
           ),
         centerTitle: true,
@@ -54,6 +54,7 @@ class ArticlePage extends StatelessWidget {
                   style: const TextStyle(
                     color: Color.fromARGB(255, 145, 145, 145),
                     fontWeight: FontWeight.bold,
+                    fontFamily: "PatrickHand",
                     fontSize: 16.0,
                   ),
                 ),
@@ -61,11 +62,12 @@ class ArticlePage extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      article.publishedAt ?? 'Unknown',
+                      timeInDetail(article.publishedAt ?? ''),
                       style: const TextStyle(
                         color: Color.fromARGB(255, 145, 145, 145),
                         fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
+                        fontFamily: "Times New Roman",
+                        fontSize: 15.0,
                       ),
                     ),
                   ),
