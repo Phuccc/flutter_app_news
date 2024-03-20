@@ -40,38 +40,68 @@ class HomeScreen extends StatelessWidget {
           fontWeight: FontWeight.bold,
           fontSize: 25,
         ),
-        backgroundColor: Color.fromARGB(255, 215, 236, 247),
+        backgroundColor: const Color.fromARGB(255, 215, 236, 247),
       ),
-      body: FutureBuilder(
-        future: getArticles(),
-        builder: (context, snapshot) {  
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.active:
-            case ConnectionState.waiting:
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            case ConnectionState.done:
-              if (snapshot.hasData) {
-                final List<Article> articles = snapshot.data!;
-                return ListView.builder(
-                  itemCount: articles.length,
-                  itemBuilder: (context, index) {
-                    return customListTile(articles[index], context);
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else {
-                return const Center(
-                  child: Text('No articles found.'),
-                );
-              }
-          }
-        },
+      body: Column( 
+        children: [
+          Container(
+            margin: const EdgeInsets.only(right: 12.0, left: 12.0, top: 12.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: TextFormField(
+              decoration: const InputDecoration(
+                fillColor: Color.fromARGB(255, 191, 191, 192),
+                filled: true,
+                border: InputBorder.none,
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Search for article',
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+              // Thanh danh sách thể loại
+          const SizedBox(
+            height: 40,
+            child: CategoriesBar(),
+          ),
+          // Danh sách bài báo
+          const SizedBox(height: 16.0), 
+          Expanded(
+            child: FutureBuilder(
+              future: getArticles(),
+              builder: (context, snapshot) {  
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                  case ConnectionState.active:
+                  case ConnectionState.waiting:
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  case ConnectionState.done:
+                    if (snapshot.hasData) {
+                      final List<Article> articles = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: articles.length,
+                        itemBuilder: (context, index) {
+                          return customListTile(articles[index], context);
+                        },
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    } else {
+                      return const Center(
+                        child: Text('No articles found.'),
+                      );
+                    }
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -88,8 +118,8 @@ class HomeScreen extends StatelessWidget {
                   )));
       },
       child: Container(
-        margin: const EdgeInsets.all(12.0),
-        padding: const EdgeInsets.all(8.0),
+        margin: const EdgeInsets.only(right: 12, left: 12),
+        padding: const EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 243, 250, 255),
           borderRadius: BorderRadius.circular(12.0),
@@ -180,5 +210,60 @@ class HomeScreen extends StatelessWidget {
       );
     }
     return result;
+  }
+}
+
+class CategoriesBar extends StatefulWidget {
+  const CategoriesBar({super.key});
+
+  @override
+  State<CategoriesBar> createState() => _CategoriesBarState();
+}
+
+class _CategoriesBarState extends State<CategoriesBar> {
+  List<String> categories = const [
+    'All',
+    'Politics',
+    'Sports',
+    'Health',
+    'Music',
+    'Tech'
+  ];
+
+  int currentCategory = 0;
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            currentCategory = index;
+            setState(() {});
+          },
+          child: Container(
+            margin: const EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.symmetric(
+              // vertical: 8.0,
+              horizontal: 20.0,
+            ),
+            decoration: BoxDecoration(
+              color: currentCategory == index ? Colors.black : const Color.fromARGB(255, 255, 255, 255),
+              border: Border.all(),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Center(
+              child: Text(
+                categories.elementAt(index),
+                style: TextStyle(
+                  color: currentCategory == index ? Colors.white : const Color.fromARGB(255, 0, 0, 0),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
