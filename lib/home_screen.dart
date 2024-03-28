@@ -6,9 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-  
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String keyword = '';  
+  String category = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,19 +67,30 @@ class HomeScreen extends StatelessWidget {
                 prefixIcon: Icon(Icons.search),
                 hintText: 'Search for article',
               ),
+              onChanged: (value) {
+                setState(() {
+                  keyword = value; // Lưu từ khóa tìm kiếm
+                });
+              },
             ),
           ),
           const SizedBox(height: 20),
               // Thanh danh sách thể loại
-          const SizedBox(
+          SizedBox(
             height: 40,
-            child: CategoriesBar(),
+            child: CategoriesBar(
+              onCategorySelected: (String category) {
+                setState(() {
+                  this.category = category;
+                });
+              }
+            ),
           ),
           // Danh sách bài báo
           const SizedBox(height: 16.0), 
           Expanded(
             child: FutureBuilder(
-              future: getArticles(),
+              future: getArticles(keyword, category),
               builder: (context, snapshot) {  
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
@@ -119,7 +139,7 @@ class HomeScreen extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(right: 12, left: 12),
-        padding: const EdgeInsets.all(5.0),
+        padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 243, 250, 255),
           borderRadius: BorderRadius.circular(12.0),
@@ -138,13 +158,16 @@ class HomeScreen extends StatelessWidget {
               width: 100.0,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.0),
-                image: article.urlToImage != null
-                    ? DecorationImage(
-                        image: NetworkImage(article.urlToImage!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
+              child: article.urlToImage != null
+                  ? Image.network(
+                      article.urlToImage!,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      'lib/assets/images/No_Image.jpg',
+                      fit: BoxFit.cover,
+                    ),
             ),
             const SizedBox(width: 8.0),
             Expanded(
@@ -169,6 +192,7 @@ class HomeScreen extends StatelessWidget {
                       fontFamily: "PatrickHand",
                       fontSize: 14.0,
                     ),
+                    maxLines: 2,
                   ),
                   const SizedBox(height: 8.0),
                   Text(
@@ -186,9 +210,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Future<List<Article>> getArticles() async {
-    const url =
-        'https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=95ad061681af49c898335c33ab37c383';
+  Future<List<Article>> getArticles(String keyword, String category) async {
+    const apiKey = '95ad061681af49c898335c33ab37c383';
+    final url =
+      'https://newsapi.org/v2/top-headlines?country=us&category=$category&q=$keyword&apiKey=$apiKey';
     final res = await http.get(Uri.parse(url));
     final body = json.decode(res.body) as Map<String, dynamic>;
     final List<Article> result = [];
@@ -214,23 +239,27 @@ class HomeScreen extends StatelessWidget {
 }
 
 class CategoriesBar extends StatefulWidget {
-  const CategoriesBar({super.key});
-
+  final Function(String) onCategorySelected;
+  const CategoriesBar({super.key, required this.onCategorySelected});  
+  
   @override
   State<CategoriesBar> createState() => _CategoriesBarState();
 }
 
 class _CategoriesBarState extends State<CategoriesBar> {
+  
   List<String> categories = const [
     'All',
-    'Politics',
-    'Sports',
+    'Business',
+    'Entertainment',
+    'General',
     'Health',
-    'Music',
-    'Tech'
+    'Science',
+    'Sports',
+    'Technology'
   ];
-
   int currentCategory = 0;
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -239,8 +268,14 @@ class _CategoriesBarState extends State<CategoriesBar> {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            currentCategory = index;
-            setState(() {});
+            setState(() {
+              currentCategory = index;
+            });
+            if (index == 0) {
+              widget.onCategorySelected('');
+            } else {
+              widget.onCategorySelected(categories[index]);
+            }
           },
           child: Container(
             margin: const EdgeInsets.only(right: 8.0),
@@ -249,7 +284,7 @@ class _CategoriesBarState extends State<CategoriesBar> {
               horizontal: 20.0,
             ),
             decoration: BoxDecoration(
-              color: currentCategory == index ? Colors.black : const Color.fromARGB(255, 255, 255, 255),
+              color: currentCategory == index ? const Color.fromARGB(255, 191, 233, 240) : const Color.fromARGB(255, 255, 255, 255),
               border: Border.all(),
               borderRadius: BorderRadius.circular(16.0),
             ),
@@ -257,7 +292,7 @@ class _CategoriesBarState extends State<CategoriesBar> {
               child: Text(
                 categories.elementAt(index),
                 style: TextStyle(
-                  color: currentCategory == index ? Colors.white : const Color.fromARGB(255, 0, 0, 0),
+                  color: currentCategory == index ? const Color.fromARGB(255, 240, 10, 10) : const Color.fromARGB(255, 0, 0, 0),
                 ),
               ),
             ),
